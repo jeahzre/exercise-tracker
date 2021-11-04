@@ -3,163 +3,71 @@ import { Component } from "react";
 class ExercisesList extends Component {
     constructor(props) {
         super(props);
-        this.state = {
-            _id: '',
-            logs: [],
-            exerciseID: '',
-        }
-        // this.handle_idChange = this.props.handle_idChange.bind(this)
-        this.handleChange = this.handleChange.bind(this)
-        this.handleSubmit = this.handleSubmit.bind(this)
-        this.handleEdit = this.handleEdit.bind(this)
-        this.handleEditSubmit = this.handleEditSubmit.bind(this)
-        this.handleDelete = this.handleDelete.bind(this)
+        // this.state = {
+        // }
+        this.toggleFilters = this.toggleFilters.bind(this);
     }
 
-    handleChange(e) {
-        console.log(e.target.value)
-        if (e.target.id === 'exercises-list-id') {
-            this.setState({
-                _id: e.target.value
-            })
-        } else {
-            const listIndex = Array.from(e.target.parentElement.parentElement.parentElement.children).indexOf(e.target.parentElement.parentElement);
-            if (e.target.id === 'edit-description') {
-                this.setState({
-                    logs: [
-                        ...this.state.logs.slice(0, listIndex),
-                        {
-                            ...this.state.logs[listIndex],
-                            description: e.target.value
-                        },
-                        ...this.state.logs.slice(listIndex + 1)
-                    ]
-                })
-            } else if (e.target.id === 'edit-duration') {
-                this.setState({
-                    logs: [
-                        ...this.state.logs.slice(0, listIndex),
-                        {
-                            ...this.state.logs[listIndex],
-                            duration: Number(e.target.value)
-                        },
-                        ...this.state.logs.slice(listIndex + 1)
-                    ]
-                })
-            }
-            e.target.focus()
-        }
+    // filter
+    toggleFilters() {
+        const filterBox = document.getElementById('filter-box');
+        console.log(filterBox.clientHeight)
+        filterBox.style.height = filterBox.clientHeight === 0 ? 'auto' : '0px';
     }
 
-    async handleSubmit(e) {
-        e.preventDefault();
-        console.log(this.state._id)
-        await fetch(`http://localhost:5000/api/users/${this.state._id}/logs`, {
-            method: 'GET'
-            // headers: {
-            //     'Content-type': 'application/json'
-            // }
-        })
-            .then(async res => {
-                const data = await res.json();
-                const dataPlusEditing = [...data.logs].map(data => {
-                    return {
-                        ...data,
-                        isEditing: false
-                    }
-                })
-                console.log(dataPlusEditing);
-                this.setState({
-                    logs: dataPlusEditing
-                })
-            })
-            .catch(error => console.log(error))
-        this.setState({
-            _id: ''
-        })
-    }
-
-    async handleEdit(e) {
-        console.log('handleEdit');
-        console.log(e.target.parentElement.parentElement.id);
-        const listIndex = Array.from(e.target.parentElement.parentElement.parentElement.children).indexOf(e.target.parentElement.parentElement);
-        this.setState({
-            exerciseID: e.target.parentElement.parentElement.id,
-            logs: [
-                ...this.state.logs.slice(0, listIndex),
-                {
-                    ...this.state.logs[listIndex],
-                    isEditing: true
-                },
-                ...this.state.logs.slice(listIndex + 1)
-            ]
-        });
-        // const listIndex = Array.from(e.target.parentElement.parentElement.parentElement.children).indexOf(e.target.parentElement.parentElement);
-    }
-
-    async handleEditSubmit(e) {
-        console.log('handleEditSubmit');
-        const listIndex = Array.from(e.target.parentElement.parentElement.parentElement.children).indexOf(e.target.parentElement.parentElement);
-        this.setState({
-            exerciseID: '',
-            logs: [
-                ...this.state.logs.slice(0, listIndex),
-                {
-                    ...this.state.logs[listIndex],
-                    isEditing: false
-                },
-                ...this.state.logs.slice(listIndex + 1)
-            ]
-        });
-        const toBeUpdatedLog = this.state.logs.filter(log => log._id === this.state.exerciseID);
-        console.log(toBeUpdatedLog);
-        const { date, description, duration, _id } = toBeUpdatedLog[0];
-        const toBeUpdatedLogMinusEditing = {
-            date, description, duration, _id
-        }
-        await fetch(`http://localhost:5000/api/users/${this.state.exerciseID}/logs`, {
-            method: 'PATCH',
-            body: JSON.stringify(toBeUpdatedLogMinusEditing),
-            headers: {
-                'Content-type': 'application/json'
-            }
-        });
-    }
-
-    async handleDelete(e) {
-        console.log('handleDelete')
-        const listIndex = Array.from(e.target.parentElement.parentElement.parentElement.children).indexOf(e.target.parentElement.parentElement);
-        const toBeDeletedID = e.target.parentElement.parentElement.id;
-        console.log(toBeDeletedID);
-        // make sure exerciseID and logs set to default(exercise: empty, logs[listIndex].isEditing: false)
-        this.setState({
-            exerciseID: '',
-            logs: [
-                ...this.state.logs.slice(0, listIndex),
-                {
-                    ...this.state.logs[listIndex],
-                    isEditing: false
-                },
-                ...this.state.logs.slice(listIndex + 1)
-            ]
-        });
-        await fetch(`http://localhost:5000/api/users/${toBeDeletedID}/logs`, {
-            method: 'DELETE'
-        });
-    }
 
     render() {
-        console.log(this.state)
+        // console.log(this.state)
+        const { userID, logs, handleChange, handleSubmit, handleEdit, handleEditSubmit, handleDelete, handleCheck, handleApplyFilterSubmit, handleFilterChange, showFromInput, showToInput, showLimitInput, from, to, limit, errorMsg, successMsg } = this.props;
+        console.log('msg', successMsg, errorMsg)
         return (
             <>
-                <form id="get-exercises-form" onSubmit={this.handleSubmit}>
-                    <div id="form-title">Get Your Exercise Logs</div>
+                <form id="get-exercises-form" onSubmit={handleSubmit} className="clearfix">
+                    <fieldset>
+                    <legend id="form-title">Get Your Exercise Logs</legend>
+                        <div id="alert" className={errorMsg ? "alert-error" : "alert-success"}>{errorMsg ? errorMsg : successMsg}</div>
+                    {/* button type is not submit */}
+                    <button type="button" id="filter-btn" onClick={this.toggleFilters}>Filter{(from||to||limit)? '  v' : ''}</button>
+                    <div id="filter-box">
+                        <div id="filters" className="clearfix">
+                            <div id="label-input">
+                                <div id="checkbox-label">
+                            <input type="checkbox" id="from" onClick={handleCheck}/>
+                            <label htmlFor="from">From</label>
+                                </div>
+                                <input type="date" id="change-from" className="change-filter" name="from" style={{ display: showFromInput ? 'block' : 'none' }} onChange={handleFilterChange} value={from}/>
+                            </div>
+                            <div id="label-input">
+                                <div id="checkbox-label">
+                            <input type="checkbox" id="to" onClick={handleCheck}/>
+                            <label htmlFor="to">To</label>
+                                </div>
+                                <input type="date" id="change-to" className="change-filter" style={{ display: showToInput ? 'block' : 'none' }} onChange={handleFilterChange} value={to}/>
+                            </div>
+                            <div id="label-input">
+                                <div id="checkbox-label">
+                            <input type="checkbox" id="limit" onClick={handleCheck}/>
+                            <label htmlFor="limit">Limit</label>
+                                </div>
+                                <input type="number" placeholder="limit" id="change-limit" className="change-filter" style={{ display: showLimitInput ? 'block' : 'none' }} onChange={handleFilterChange} value={limit}/>
+                            </div>
+                            <button type="button" id="apply-filter-btn" onClick={() => handleApplyFilterSubmit({
+                                from, to, limit
+                            })}>Apply</button>
+                        </div>
+                        
+                    </div>
+
                     <div id="form-inputs">
                         <div id="label-input">
                             <label htmlFor="exercises-list-id">User ID</label>
-                            <input id="exercises-list-id" value={this.state._id} onChange={this.handleChange} type="text" name="_id" placeholder="ID" />
+                            <div id="get-engine">
+                            <input id="exercises-list-id" value={userID} onChange={handleChange} type="text" name="_id" placeholder="ID" />
+                            <button type="submit">Get</button>
+                            </div>
                         </div>
                     </div>
+                    </fieldset>
                 </form>
 
                 <table id="exercise-list-table">
@@ -174,42 +82,50 @@ class ExercisesList extends Component {
                     </thead>
                     <tbody>
                         {
-                            this.state.logs.map((log) => {
+                            logs.map((log) => {
                                 const { _id, description, duration, date } = log;
-                                const year = new Date(date).getFullYear();
-                                const month = new Date(date).getMonth() + 1;
-                                let aDate = `${new Date(date).getDate()}`;
-                                aDate = Number(aDate) < 10 ? `0${aDate}` : `${aDate}`;
+                                let year, month, aDate;
+                                    console.log('isnt editing')
+                                    // pad leading zero
+                                    const pad = (num, size) => {
+                                        num = num.toString();
+                                        while (num.length < size) num = "0" + num;
+                                        return num;
+                                    }
+                                    year = pad(`${new Date(date).getFullYear()}`, 4);
+                                    month = pad(`${new Date(date).getMonth() + 1}`, 2);
+                                    aDate = pad(`${new Date(date).getDate()}`, 2);
                                 const YYYY_MM_DD = `${year}-${month}-${aDate}`;
-                                const listIndex = this.state.logs.indexOf(log);
-                                const onEditingRow = this.state.logs[listIndex].isEditing;
+                                const listIndex = logs.indexOf(log);
+                                const onEditingRow = logs[listIndex].isEditing;
+                                console.log('2', date)
                                 return (
                                     <>
                                         <tr id={_id} key={`${_id}1`}>
                                             <td key={`${_id}2`}>
                                                 {
                                                     onEditingRow ?
-                                                        <input id="edit-description" type="text" value={description} onChange={this.handleChange} key={`${_id}3`} /> :
+                                                        <input id="edit-description" type="text" value={description} onChange={handleChange} key={`${_id}3`} /> :
                                                         description
                                                 }
                                             </td>
                                             <td key={`${_id}4`}>
                                                 {
                                                     onEditingRow ?
-                                                        <input id="edit-duration" type="number" value={duration} onChange={this.handleChange} key={`${_id}5`} /> :
+                                                        <input id="edit-duration" type="number" value={duration} onChange={handleChange} key={`${_id}5`} /> :
                                                         duration
                                                 }
                                             </td>
                                             <td key={`${_id}6`}>
                                                 {
                                                     onEditingRow ?
-                                                        <input id="edit-date" type="date" value={YYYY_MM_DD} onChange={this.handleChange} key={`${_id}7`} /> :
+                                                        <input id="edit-date" type="date" value={YYYY_MM_DD} onChange={handleChange} key={`${_id}7`} onKeyPress={() => {return false}}/> :
                                                         date.toString()
                                                 }
                                             </td>
                                             <td id="action" key={`${_id}8`}>
                                                 {console.log('onEditingRow', onEditingRow)}
-                                                <button onClick={onEditingRow ? this.handleEditSubmit : this.handleEdit} id="action" key={`${_id}9`}>
+                                                <button onClick={onEditingRow ? handleEditSubmit : handleEdit} id="action" key={`${_id}9`}>
                                                     {
                                                         onEditingRow ?
                                                             "Done" : "Edit"
@@ -217,7 +133,7 @@ class ExercisesList extends Component {
                                                 </button>
                                             </td>
                                             <td id="action" key={`${_id}10`}>
-                                                <button onClick={this.handleDelete} id="action" key={`${_id}11`}>
+                                                <button onClick={handleDelete} id="action" key={`${_id}11`}>
                                                     Delete
                                                 </button>
                                             </td>

@@ -14,10 +14,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.post("/api/users", async (req, res) => {
-  const newUser = new User(req.body);
-  console.log("newUser", newUser);
-  await newUser.save();
-  res.json(newUser);
+  try {
+    const newUser = new User(req.body);
+    console.log("newUser", newUser);
+    await newUser.save();
+    res.json({msg: `New user with username: ${newUser.username} and id: ${newUser._id} has been created.`});
+  } catch (error) {
+    console.log(error)
+    res.status(400).json({ msg: "Please fill your new username" });
+  }
 });
 
 app.get("/api/users", async (req, res) => {
@@ -70,21 +75,22 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
 });
 
 app.get("/api/users/:id/logs", async (req, res) => {
-  console.log("logs id", req.params.id);
-  const addedUser = await User.findOne({ _id: req.params.id });
+  console.log("user id", req.params.id);
   try {
+    const addedUser = await User.findOne({ _id: req.params.id });
+    console.log('addedUser', addedUser)
     let userLog;
     const { from, to, limit } = req.query;
     console.log("from, to, limit:", from, to, limit);
     
     if (Object.keys(req.query).length !== 0) {
-      const selector = "-_id description duration date";
+      const selector = "_id description duration date";
       if (from && !to) {
         console.log("only from");
         const fromOnly = {
           createdBy: req.params.id,
           date: {
-            $gte: new Date(from).toISOString()
+            $gte: new Date(`${from}`).toISOString()
           }
         };
         if (limit) {
@@ -98,7 +104,7 @@ app.get("/api/users/:id/logs", async (req, res) => {
         const toOnly = {
           createdBy: req.params.id,
           date: {
-            $lte: new Date(to).toISOString()
+            $lte: new Date(`${to}`).toISOString()
           }
         };
         if (limit) {
@@ -108,32 +114,41 @@ app.get("/api/users/:id/logs", async (req, res) => {
         }
         console.log(userLog);
       } else if (from && to) {
-        console.log("both");
+        console.log("both", from, to);
         const bothFromTo = {
           createdBy: req.params.id,
           date: {
-            $gte: new Date(from).toISOString(),
-            $lte: new Date(to).toISOString()
+            $gte: new Date(`${from}`).toISOString(),
+            $lte: new Date(`${to}`).toISOString()
           }
         };
         if (limit) {
           userLog = await Log.find(bothFromTo, selector).limit(Number(limit));
         } else {
-          userLog = await Log.find(bothFromTo, selector);
+          userLog = await Log.find({
+            createdBy: req.params.id,
+            date: {
+              $gte: new Date(`${from}`).toISOString(),
+              $lte: new Date(`${to}`).toISOString()
+            }
+          }, selector);
+          console.log('user logz', userLog);
         }
-        console.log(userLog);
+        console.log('user log', userLog);
       } else if(!from && !to && limit) {
         console.log("only limit");
         userLog = await Log.find({createdBy: req.params.id}, selector).limit(Number(limit));
       }
       userLog.map(log => {
           log.date = new Date(log.date).toDateString();
-        })
+      })
+      console.log('userlog', userLog)
       res.json({
         username: addedUser.username,
         count: userLog.length,
         _id: addedUser._id,
-        logs: userLog
+        logs: userLog,
+        msg: "You have got it successfully"
       });
     } else {
       try {
@@ -154,14 +169,15 @@ app.get("/api/users/:id/logs", async (req, res) => {
           username: addedUser.username,
           count: userLog.length,
           _id: addedUser._id,
-          logs: userLog
+          logs: userLog,
+          msg: "You have got it successfully"
         });
       } catch (error) {
         console.log(error);
       }
     }
   } catch (error) {
-    res.json(error);
+    res.status(400).json({msg: "Data isn't valid"});
   }
 });
 

@@ -5,6 +5,7 @@
 }
 
 body {
+    padding-top: 15vw;
     font-family: 'Montserrat', sans-serif;
     background-color: #000;
 }
@@ -15,7 +16,7 @@ form {
     margin-top: 5vw;
     width: 80%; 
     margin: auto;
-    padding: 3vw;
+    /* padding: 3vw; */
 }
 
 #form-inputs {
@@ -27,6 +28,14 @@ form input {
     font-family: 'Montserrat', sans-serif;
 }
 
+fieldset {
+    padding: 2vw;
+}
+
+/* legend {
+    text-align: center
+} */
+
 
 #label-input:not(:first-of-type) {
     margin-top: 2vw;
@@ -36,14 +45,30 @@ form input {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: center
 }
 
-#label-input label {
-    width: 50%
+#alert {
+    width: 100%;
+    text-align: center;
+    border-radius: 3px;
+    margin-top: 3vw
 }
 
-#label-input input {
-    width: 50%
+.alert-error {
+    background-color: #ff321b;
+}
+
+.alert-success {
+    background-color: cadetblue;
+}
+
+#exercise-form #label-input label, #user-form #label-input label{
+    width: 40%
+}
+
+#exercise-form #label-input input{
+    width: 60%
 }
 
 
@@ -51,22 +76,118 @@ form input {
 #user-form {
     display: flex;
     flex-direction: column;
+    margin-top: 10vw;
 }
 
 /* exercise form */
 #exercise-form {
     display: flex;
     flex-direction: column;
+    margin-top: 5vw;
 }
 
 #exercise-submit-button {
-    margin-top: 2vw
+    margin-top: 2vw;
+    float: right;
 }
 
 /* exercise list */
 /* #exercise-edit-form {
     margin: auto
 } */
+#get-exercises-form {
+    margin-top: 5vw;
+    overflow: auto;
+}
+
+.clearfix::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+#get-exercises-form #filter-btn {
+    width: 20%;
+}
+
+#filter-box {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    height: 0; 
+    overflow: hidden;
+}
+
+#filters {
+    width: 100%;
+    margin-top: 3vw;
+    background-color: rgb(78, 78, 78);
+    padding: 3vw;
+    font-size: 2vw
+}
+
+#filters #label-input {
+    height: 3vw;
+    margin-top: 5vw
+}
+
+#filters #checkbox-label label {
+    border: 1px solid rgb(0, 0, 0);
+    background-color: rgb(56, 56, 56);
+    padding: 0.5vw;
+    cursor: pointer;
+}
+
+#label-input #from, #label-input #to, #label-input #limit {
+    width: auto;
+    margin: 0;
+    margin-right: 3vw;
+    /* align-self: center; */
+}
+
+#filters .change-filter {
+    display: none;
+    height: auto;
+    font-size: 2vw;
+}
+
+#get-exercises-form #form-inputs {
+    margin-top: 3vw;
+}
+
+/* #get-exercises-form #label-input input {
+    width: 60%
+} */
+
+/* #checkbox-label {
+    display: flex;
+    align-content: center
+} */
+
+#apply-filter-btn {
+    margin-top: 2vw; 
+    padding: 0.25vw 0.5vw;
+    float: right;
+}
+
+#create-user-engine, #get-engine {
+    display: flex
+}
+
+#create-user-engine button, #get-engine button {
+    align-self: stretch
+}
+
+#exercise-list-table {
+    width: 80%;
+    margin: 5vw auto;
+    margin-bottom: 10vw;
+    font-size: 1.75vw;
+    max-width: 100%;
+    text-align: center;
+    background-color: rgb(105, 105, 105);
+    border-collapse: collapse;
+}
 
 #exercise-list-table input {
     background-color: rgb(136, 136, 136);
@@ -78,17 +199,6 @@ form input {
     margin: 0;
     border: none;
     box-sizing: border-box;
-}
-
-#exercise-list-table {
-    width: 80%;
-    margin: auto;
-    margin-bottom: 10vw;
-    font-size: 1.75vw;
-    max-width: 100%;
-    text-align: center;
-    background-color: rgb(105, 105, 105);
-    border-collapse: collapse;
 }
 
 #exercise-list-table td, #exercise-list-table th {

@@ -1,4 +1,5 @@
 {
+  "homepage": "https://jeatz.github.io/exercise-tracker",
   "name": "fcc-exercise-tracker",
   "version": "0.1.0",
   "description": "A REST API project, part of Free Code Camp's curriculum",
@@ -8,13 +9,16 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "serverStart": "nodemon backend/server.js"
+    "serverStart": "nodemon backend/server.js", 
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "dependencies": {
     "axios": "^0.24.0",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
+    "gh-pages": "^3.2.3",
     "mongoose": "^6.0.12",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",

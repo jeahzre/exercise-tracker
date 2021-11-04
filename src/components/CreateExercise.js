@@ -1,22 +1,24 @@
-import axios from "axios";
+// import axios from "axios";
 import { Component } from "react";
 
+// _id:
 class CreateExercise extends Component {
     constructor(props) {
         super(props);
+        console.log(props)
         this.state = {
             _id: '',
             description: '',
             duration: '',
             date: ''
         };
-        this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleCreateExerciseSubmit = this.handleCreateExerciseSubmit.bind(this);
         this.handleChange = this.handleChange.bind(this);
     }
 
     handleChange(e) {
-        const inputName = e.target.name
-        const inputValue = e.target.value
+        const inputName = e.target.name;
+        const inputValue = e.target.value;
         if (inputName === '_id') {
             this.setState({
                 _id: inputValue
@@ -37,35 +39,53 @@ class CreateExercise extends Component {
         console.log(this.state)
     }
 
-    async handleSubmit(e) {
+    async handleCreateExerciseSubmit(e, log) {
         e.preventDefault();
-        console.log(JSON.stringify({
-            description: this.state.description,
-            duration: this.state.duration,
-            date: this.state.date
-        }), 'submitting')
-        await fetch(`http://localhost:5000/api/users/${this.state._id}/exercises`, {
+        console.log(this.props.excersiseID)
+        console.log(JSON.stringify(log), 'submitting')
+        await fetch(`http://localhost:5000/api/users/${log._id}/exercises`, {
             method: 'POST',
-            body: JSON.stringify({
-                description: this.state.description,
-                duration: this.state.duration,
-                date: this.state.date
-            }),
+            body: JSON.stringify(log),
             headers: {
                 'Content-type': 'application/json',
                 'Accept': 'application/json, text/plain, */*'
             }
         })
             .then(res => res.json())
-            .then(data => console.log(data))
-            .catch(error => console.log(error));
+            .then(data => {
+                this.setState({
+                    errorMsg: '',
+                    successMsg: 'Log created.',
+                })
+            })
+            .catch(error => {
+                console.log(error);
+                this.setState({
+                    errorMsg: 'Please fill the user ID, description and duration info.',
+                    successMsg: '',
+                })
+            });
+        this.setState({
+            _id: '',
+            description: '',
+            duration: '',
+            date: '',
+        });
     }
 
     render() {
+        // console.log(this.state)
         return (
             <>
-                <form id="exercise-form" onSubmit={this.handleSubmit}>
-                    <div id="form-title">Create New Exercise</div>
+                <form id="exercise-form" onSubmit={(e) => this.handleCreateExerciseSubmit(e, {
+                    _id: this.state._id,
+                    description: this.state.description, 
+                    duration: this.state.duration, 
+                    date: this.state.date
+                })}>
+                    <fieldset>
+                    <legend id="form-title">Create New Exercise</legend>
+                        <div id="alert" className={this.state.errorMsg ? "alert-error" : "alert-success"}>{this.state.errorMsg ? this.state.errorMsg : this.state.successMsg}</div>
                     <div id="form-inputs">
                         <div id="label-input">
                             <label htmlFor="_id">ID</label>
@@ -85,6 +105,7 @@ class CreateExercise extends Component {
                         </div>
                     </div >
                     <button id="exercise-submit-button" type="submit">Submit</button>
+                    </fieldset>
                 </form >
             </>
         )
